@@ -20,7 +20,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-       java.awt.EventQueue.invokeLater(() -> new GestorEscuderia().setVisible(true));
+       java.awt.EventQueue.invokeLater(() -> new GestorEscuderia(new java.util.ArrayList<>()).setVisible(true));
     }
     
 

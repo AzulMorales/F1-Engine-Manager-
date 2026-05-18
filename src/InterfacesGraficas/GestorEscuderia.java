@@ -4,23 +4,93 @@
  */
 package InterfacesGraficas;
 
+import Modelos.Empleadosf1;
+import dialogo.DialAñadirEmplExist;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ItemEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author abrah
  */
-public class GestorEscuderia extends javax.swing.JFrame {
+public final class GestorEscuderia extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GestorEscuderia.class.getName());
+    private DefaultTableModel modelo;
+    private List<Empleadosf1> listaDePersonal;
+    private List<Empleadosf1> listaGlobal;
 
     /**
      * Creates new form GestorEscuderia
+     * @param listaCompartida
      */
-    public GestorEscuderia() {
+    public GestorEscuderia(List<Empleadosf1> listaCompartida) {
         initComponents();
-        setLocationRelativeTo(null);
-        setTitle("Gestor Escuderia");   
+        this.listaGlobal = listaCompartida; 
+        this.listaDePersonal = new ArrayList<>(); 
+        setTitle("Gestor de Escuderia");
         setResizable(false);
+        try {
+        Image icon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Iconos/f1logo.png"));
+        this.setIconImage(icon);
+    } catch (Exception e) {
+        System.out.println("No se pudo cargar el icono: " + e.getMessage());
     }
+        
+        String[] columnas = {"ID", "Nombre", "Rol"};
+        modelo = new DefaultTableModel(columnas, 0);
+        tablaPersonal.setModel(modelo);
+        tablaPersonal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        actualizarTabla();
+    }
+
+    public void actualizarTabla() {
+        modelo.setRowCount(0);
+        for (Empleadosf1 emp : listaDePersonal) {
+            agregarFilaATabla(emp);
+        }
+    }
+    public void agregarFilaATabla(Empleadosf1 empleado) {
+    DefaultTableModel modeloLocal = (DefaultTableModel) tablaPersonal.getModel();
+    
+    Object[] fila = new Object[4];
+    fila[0] = empleado.getId();           
+    fila[1] = empleado.getNombre();       
+    fila[2] = empleado.getRol();          
+    fila[3] = (empleado.getContrato() != null) ? empleado.getContrato().getSalarioBase() : 0.0;
+
+    modeloLocal.addRow(fila);
+    }
+    public void despedirEmpleadoPorId(String id) {
+        boolean eliminado = listaDePersonal.removeIf(emp -> emp.getId().equals(id));
+        if (eliminado) {
+            actualizarTabla();
+            txDespedir.setText(""); // Limpiar campo
+             //limpiar la info de la derecha
+            lbNombre.setText("---");
+            lbEdad.setText("---"); // Añadimos la edad aquí
+            lbSalario.setText("---");
+            lbBonos.setText("---");
+            lbDuracion.setText("---");
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "No existe personal con el ID: " + id);
+        }
+    }
+    public void filtrarPorRol(String rolSeleccionado) {
+       modelo.setRowCount(0); // Limpiar tabla antes de mostrar resultados
+        for (Empleadosf1 emp : listaDePersonal) {
+            if (rolSeleccionado.equals("Todos") || emp.getRol().equalsIgnoreCase(rolSeleccionado)) {
+                agregarFilaATabla(emp);
+            }   
+        }
+    }
+
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -33,19 +103,32 @@ public class GestorEscuderia extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        lbNombre = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        lbEdad = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        lbSalario = new javax.swing.JLabel();
+        lbBonos = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        lbDuracion = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        lbPresupuesto = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btAñadirEmpla = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jButton2 = new javax.swing.JButton();
+        cbBuscarRol = new javax.swing.JComboBox<>();
+        btPresuTotal = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txDespedir = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tablaPersonal = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -53,15 +136,111 @@ public class GestorEscuderia extends javax.swing.JFrame {
 
         jPanel3.setBackground(new java.awt.Color(66, 66, 87));
 
+        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Iconos/imagen-de-perfil.png"))); // NOI18N
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI Semibold", 2, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Contrato");
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel8.setText("Nombre:");
+
+        lbNombre.setForeground(new java.awt.Color(204, 204, 204));
+        lbNombre.setText("###########");
+
+        jLabel10.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel10.setText("Edad:");
+
+        lbEdad.setForeground(new java.awt.Color(204, 204, 204));
+        lbEdad.setText("********");
+
+        jLabel12.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        jLabel12.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel12.setText("Salario Base:");
+
+        lbSalario.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
+        lbSalario.setForeground(new java.awt.Color(204, 204, 204));
+        lbSalario.setText("*******");
+
+        lbBonos.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
+        lbBonos.setForeground(new java.awt.Color(204, 204, 204));
+        lbBonos.setText("*******");
+
+        jLabel15.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel15.setText("Bonos:");
+
+        jLabel16.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        jLabel16.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel16.setText("Duración:");
+
+        lbDuracion.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        lbDuracion.setForeground(new java.awt.Color(204, 204, 204));
+        lbDuracion.setText("#######");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lbSalario, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lbNombre, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lbEdad, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lbDuracion, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lbBonos, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 372, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbNombre)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbEdad)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addGap(24, 24, 24)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lbSalario)
+                .addGap(11, 11, 11)
+                .addComponent(jLabel15)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lbBonos)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel16)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lbDuracion)
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         jPanel4.setBackground(new java.awt.Color(66, 66, 87));
@@ -70,9 +249,9 @@ public class GestorEscuderia extends javax.swing.JFrame {
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Presupuesto Total:");
 
-        jLabel2.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        lbPresupuesto.setBackground(new java.awt.Color(255, 255, 255));
+        lbPresupuesto.setForeground(new java.awt.Color(255, 255, 255));
+        lbPresupuesto.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -81,9 +260,9 @@ public class GestorEscuderia extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lbPresupuesto, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -91,32 +270,38 @@ public class GestorEscuderia extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lbPresupuesto, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel5.setBackground(new java.awt.Color(66, 66, 87));
 
-        jButton1.setBackground(new java.awt.Color(106, 112, 171));
-        jButton1.setText("Añadir Empleado");
-        jButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton1.addActionListener(this::jButton1ActionPerformed);
+        btAñadirEmpla.setBackground(new java.awt.Color(106, 112, 171));
+        btAñadirEmpla.setText("Añadir Empleado");
+        btAñadirEmpla.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        btAñadirEmpla.addActionListener(this::btAñadirEmplaActionPerformed);
 
         jLabel4.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Buscar por rol");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Piloto", "Empleado" }));
-        jComboBox1.addActionListener(this::jComboBox1ActionPerformed);
+        cbBuscarRol.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Todos", "Piloto", "Ingeniero", "Mecanico" }));
+        cbBuscarRol.addItemListener(this::cbBuscarRolItemStateChanged);
 
-        jButton2.setBackground(new java.awt.Color(106, 112, 171));
-        jButton2.setText("Generar Reporte de Gastos");
-        jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton2.addActionListener(this::jButton2ActionPerformed);
+        btPresuTotal.setBackground(new java.awt.Color(106, 112, 171));
+        btPresuTotal.setText("Generar el presupuesto total");
+        btPresuTotal.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        btPresuTotal.addActionListener(this::btPresuTotalActionPerformed);
 
         jLabel3.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Despedir Empleado (ID)");
+
+        txDespedir.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txDespedirKeyPressed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -125,15 +310,18 @@ public class GestorEscuderia extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(33, 33, 33)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(btAñadirEmpla, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(33, 33, 33))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(btPresuTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)))
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txDespedir, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
                 .addGap(30, 30, 30)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cbBuscarRol, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE))
                 .addGap(129, 129, 129))
         );
@@ -142,40 +330,57 @@ public class GestorEscuderia extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(51, 51, 51)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbBuscarRol, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txDespedir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                 .addGap(8, 8, 8)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(btAñadirEmpla)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jButton2)
+                .addComponent(btPresuTotal)
                 .addGap(55, 55, 55))
         );
 
         jScrollPane3.setBackground(new java.awt.Color(66, 66, 87));
         jScrollPane3.setViewportBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jTable1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tablaPersonal.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        tablaPersonal.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
             },
             new String [] {
-                "ID", "Nombre", "Nacionalidad", "Estado"
+                "ID", "Nombre", "Rol"
             }
-        ));
-        jScrollPane3.setViewportView(jTable1);
+        ) {
+            boolean[] canEdit = new boolean [] {
+                true, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tablaPersonal.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaPersonalMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(tablaPersonal);
 
         jLabel5.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("Lista de personal ");
+
+        jLabel6.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel6.setText("Detalles del Personal Seleccionado");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -186,13 +391,14 @@ public class GestorEscuderia extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 572, Short.MAX_VALUE)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 572, Short.MAX_VALUE))
+                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addComponent(jLabel5))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel6)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -202,44 +408,110 @@ public class GestorEscuderia extends javax.swing.JFrame {
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(29, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btAñadirEmplaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAñadirEmplaActionPerformed
+      DialAñadirEmplExist dialogo = new DialAñadirEmplExist(this, true, listaGlobal);
+      dialogo.setVisible(true);
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    
+      Empleadosf1 empNuevo = dialogo.getempleadoFinal(); 
+    
+      if (empNuevo != null) {
+        // Validar que no se repita por ID
+        boolean yaExiste = listaDePersonal.stream().anyMatch(e -> e.getId().equals(empNuevo.getId()));
+        
+        if (!yaExiste) {
+            listaDePersonal.add(empNuevo);
+            actualizarTabla();
+            
+            javax.swing.JOptionPane.showMessageDialog(this, "Empleado añadido a la escudería.");
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Este empleado ya está en la escudería.");
+        }
+    }
+    }//GEN-LAST:event_btAñadirEmplaActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
+    private void btPresuTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btPresuTotalActionPerformed
+       double acumulado = 0;
+        for (Modelos.Empleadosf1 emp : listaDePersonal) {
+        
+            if (emp.getContrato() != null) {
+                acumulado += emp.getContrato().getSalarioBase();
+        }
+    }
+
+    // Actualizar el label con el resultado final
+    lbPresupuesto.setText("$ " + String.format("%.2f", acumulado));
+    }//GEN-LAST:event_btPresuTotalActionPerformed
+
+    private void cbBuscarRolItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbBuscarRolItemStateChanged
+       if (evt.getStateChange() == ItemEvent.SELECTED) {
+            String seleccion = cbBuscarRol.getSelectedItem().toString();
+            filtrarPorRol(seleccion);
+        }
+    }//GEN-LAST:event_cbBuscarRolItemStateChanged
+
+    private void txDespedirKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txDespedirKeyPressed
+     if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+        String idABuscar = txDespedir.getText().trim();
+        
+        if (!idABuscar.isEmpty()) {
+            despedirEmpleadoPorId(idABuscar);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, escribe un ID para despedir.");
+        }
+     }
+    }//GEN-LAST:event_txDespedirKeyPressed
+
+    private void tablaPersonalMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaPersonalMouseClicked
+        int fila = tablaPersonal.getSelectedRow();
+    
+    if (fila != -1) {
+        String idBusqueda = tablaPersonal.getValueAt(fila, 0).toString();
+        for (Empleadosf1 emp : listaDePersonal) {
+            if (emp.getId().equals(idBusqueda)) {
+             
+                lbNombre.setText(emp.getNombre());
+                lbEdad.setText(emp.getEdad() + " años");
+                if (emp.getContrato() != null) {
+                    lbSalario.setText("$ " + emp.getContrato().getSalarioBase());
+                    lbBonos.setText("$ " + emp.getContrato().getBonificaciones());
+                    lbDuracion.setText(emp.getContrato().getDuracion() + " meses");
+                } else {
+                    //si no hay o no se pone datos
+                    lbSalario.setText("Sin datos");
+                    lbBonos.setText("Sin datos");
+                    lbDuracion.setText("Sin datos");
+                }
+                break; 
+            }
+        }
+    }
+    
+    }//GEN-LAST:event_tablaPersonalMouseClicked
 
     /**
      * @param args the command line arguments
@@ -263,24 +535,36 @@ public class GestorEscuderia extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new GestorEscuderia().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new Login().setVisible(true));
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JButton btAñadirEmpla;
+    private javax.swing.JButton btPresuTotal;
+    private javax.swing.JComboBox<String> cbBuscarRol;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel lbBonos;
+    private javax.swing.JLabel lbDuracion;
+    private javax.swing.JLabel lbEdad;
+    private javax.swing.JLabel lbNombre;
+    private javax.swing.JLabel lbPresupuesto;
+    private javax.swing.JLabel lbSalario;
+    private javax.swing.JTable tablaPersonal;
+    private javax.swing.JTextField txDespedir;
     // End of variables declaration//GEN-END:variables
 }

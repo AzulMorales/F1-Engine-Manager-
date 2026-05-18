@@ -11,5 +11,7 @@ package Modelos;
  */
 public class GestorEscuderia {
     
+    
+    String[] columnas = {"ID", "Foto", "Nombre", "Nacionalidad", "Rol", "Salario", "Estado"};
 
 }

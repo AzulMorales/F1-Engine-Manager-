@@ -4,7 +4,11 @@
  */
 package InterfacesGraficas;
 
+import Modelos.Empleadosf1;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -16,6 +20,7 @@ import javax.swing.JLabel;
 public class PantallaPrincipal extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PantallaPrincipal.class.getName());
+    private List<Empleadosf1> listaCompartida = new ArrayList<>();
 
     /**
      * Creates new form PantallaPrincipal
@@ -24,6 +29,13 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(this);
         this.setTitle("F1 Engine Manager");
+        try {
+        // Obtenemos la imagen desde la ruta de recursos del proyecto
+        Image icon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Iconos/Gemini_Generated_Image_mpqahimpqahimpqa.png"));
+        this.setIconImage(icon);
+    } catch (Exception e) {
+        System.out.println("No se pudo cargar el icono: " + e.getMessage());
+    }
         SetImageLabel(JLEscuderia, "src/Iconos/f1.png");
         SetImageLabel(JLEmpleados, "src/Iconos/jefe-de-equipo.png");
         SetImageLabel(JLPistas, "src/Iconos/pista-de-carreras.png");
@@ -249,9 +261,9 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JLEmpleadosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JLEmpleadosMouseClicked
-    // 1. Crear una instancia de la ventana de destino
-    GestorEmpleados ventanaEmpleados = new GestorEmpleados();
-
+    // 1. Crear una instancia y pasar los datos
+    GestorEmpleados ventanaEmpleados = new GestorEmpleados(this.listaCompartida);
+    
     // 2. Hacer que la nueva ventana aparezca en el centro de la pantalla
     ventanaEmpleados.setLocationRelativeTo(null);
 
@@ -261,8 +273,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
 
     private void JLEscuderiaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JLEscuderiaMouseClicked
     // 1. Crear una instancia de la ventana de destino
-    GestorEscuderia ventanaEscuderia = new GestorEscuderia();
-
+    GestorEscuderia ventanaEscuderia = new GestorEscuderia(listaCompartida);
     // 2. Hacer que la nueva ventana aparezca en el centro de la pantalla
     ventanaEscuderia.setLocationRelativeTo(null);
 
